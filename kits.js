@@ -84,14 +84,14 @@ kits.getUrlParams = function () {
 //用一个对象把需要验证的规则放进去,变成对象的方法
 let strategies = {
   //验证非空
-  isNonEmpty : function(val,msg) {
-    if(val.trim().length === 0) {
+  isNonEmpty: function (val, msg) {
+    if (val.trim().length === 0) {
       return msg;
     }
   },
   //验证长度
-  minLength : function(val,len,msg) {
-    if(val.trim().length < len) {
+  minLength: function (val, len, msg) {
+    if (val.trim().length < len) {
       return msg;
     }
   },
@@ -110,28 +110,52 @@ function Validator() {
 }
 
 //给构造函数的原型添加一个方法,让其可以添加一个新的函数进去
-Validator.prototype.add = function(dom,arr) {
+Validator.prototype.add = function (dom, arr) {
   //遍历数组,往this.validateFuns添加新的验证方法
-  for(let i = 0; i < arr.length; i++) {
-    let fn = function() {
+  for (let i = 0; i < arr.length; i++) {
+    let fn = function () {
       let rule = arr[i];
-      let params = rule.fnName.split(':');//eg[minLength,8]
+      let params = rule.fnName.split(':'); //eg[minLength,8]
       let fnName = params.shift();
-      params.unshift(dom.value);//eg[dom.vlaue,8]
-      params.push(rule.errMsg);// eg[dom.value,8,rule.errMsg];
-      return strategies[fnName].apply(dom,params);
+      params.unshift(dom.value); //eg[dom.vlaue,8]
+      params.push(rule.errMsg); // eg[dom.value,8,rule.errMsg];
+      return strategies[fnName].apply(dom, params);
     }
     this.validateFuns.push(fn);
   }
 }
 
 //需要一个可以把数组里面的每个函数都执行的方法
-Validator.prototype.start = function() {
+Validator.prototype.start = function () {
   //遍历数组
-  for(let i = 0; i < this.validateFuns.length; i++) {
+  for (let i = 0; i < this.validateFuns.length; i++) {
     let msg = this.validateFuns[i]();
-    if(msg) {
+    if (msg) {
       return msg;
     }
   }
-}
+};
+
+//收集表单数据的方法
+kits.serialize = function(formSelector) {
+  let form = document.querySelector(formSelector);
+  let eles = form.querySelectorAll('[name]');
+  //创建一个空数组
+  let arr = [];
+  //由于单选框的值只能有一个,因此要判断
+  //遍历eles
+  eles.forEach(e => {
+    if (e.type === 'radio' && e.checked) {
+      let key = e.name;
+      let val = e.value;
+      arr.push(key + '=' + val);
+    }
+    if (e.type !== 'radio') {
+      let key = e.name;
+      let val = e.value;
+      arr.push(key + '=' + val);
+    }
+  });
+  //利用数组的jion方法
+  return arr.join('&')
+};
