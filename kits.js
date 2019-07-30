@@ -17,7 +17,7 @@ ktis.getMax = function () {
 };
 
 ////求n个数中的最小值
-ktis.getMax = function () {
+ktis.getMin = function () {
   let min = arguments[0];
   for (let i = 1; i < arguments.length; i++) {
     if (min > arguments[i]) {
